@@ -1,0 +1,39 @@
+# Dify 部署架构 (AWS 风格)
+
+## 主要组件
+
+### 用户访问层
+- Dify Web UI (dify-milvus-web:3000) - 使用 AWS CloudFront/ALB 图标
+
+### 应用层
+- Dify API (dify-milvus-api:5001) - 使用 AWS Lambda/ECS 图标
+- Plugin Daemon (dify-milvus-plugin-daemon:5002) - 使用 AWS Lambda/ECS 图标
+
+### 数据存储层
+- PostgreSQL
+  - Primary (dify-milvus-postgresql-primary) - 使用 AWS RDS 图标
+  - Read Replica (dify-milvus-postgresql-read) - 使用 AWS RDS Read Replica 图标
+- Redis
+  - Master (dify-milvus-redis-master) - 使用 AWS ElastiCache 图标
+  - Replicas (dify-milvus-redis-replicas) - 使用 AWS ElastiCache 图标
+
+### Milvus 向量数据库层
+- Milvus Proxy (dify-milvus-proxy) - 使用 AWS API Gateway 图标
+- Milvus Coordinator (dify-milvus-mixcoord) - 使用 AWS ECS 图标
+- Query Node (dify-milvus-querynode) - 使用 AWS ECS 图标
+- Index Node (dify-milvus-indexnode) - 使用 AWS ECS 图标
+- Data Node (dify-milvus-datanode) - 使用 AWS ECS 图标
+
+### 存储服务
+- Etcd (dify-milvus-etcd) - 使用 AWS DynamoDB 图标
+- MinIO (dify-milvus-minio) - 使用 AWS S3 图标
+- Sandbox (dify-milvus-sandbox) - 使用 AWS Fargate 图标
+
+### 消息队列
+- Pulsar (dify-milvus-pulsarv3) - 使用 AWS MSK/Kinesis 图标
+  - Zookeeper (dify-milvus-pulsarv3-zookeeper) - 使用 AWS MSK 图标
+  - Bookies (dify-milvus-pulsarv3-bookie) - 使用 AWS MSK 图标
+  - Broker (dify-milvus-pulsarv3-broker) - 使用 AWS MSK 图标
+
+## 部署环境
+- Kubernetes 集群 (EKS) - default 命名空间

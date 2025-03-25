@@ -1,0 +1,189 @@
+## Graviton-optimized values for Milvus
+## This configuration sets all Milvus components to run on AWS Graviton processors
+## and reduces PV sizes to 50GB
+
+## Global node selector to target Graviton instances
+## This applies to all Milvus components unless overridden
+nodeSelector:
+  kubernetes.io/arch: arm64
+
+## Global tolerations to ensure pods can be scheduled on Graviton nodes
+tolerations:
+- key: "kubernetes.io/arch"
+  operator: "Equal"
+  value: "arm64"
+  effect: "NoSchedule"
+
+## Standalone component configuration
+standalone:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  tolerations:
+  - key: "kubernetes.io/arch"
+    operator: "Equal"
+    value: "arm64"
+    effect: "NoSchedule"
+
+## Proxy component configuration
+proxy:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  tolerations:
+  - key: "kubernetes.io/arch"
+    operator: "Equal"
+    value: "arm64"
+    effect: "NoSchedule"
+
+## Root coordinator configuration
+rootCoord:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  tolerations:
+  - key: "kubernetes.io/arch"
+    operator: "Equal"
+    value: "arm64"
+    effect: "NoSchedule"
+
+## Query coordinator configuration
+queryCoord:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  tolerations:
+  - key: "kubernetes.io/arch"
+    operator: "Equal"
+    value: "arm64"
+    effect: "NoSchedule"
+
+## Data coordinator configuration
+dataCoord:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  tolerations:
+  - key: "kubernetes.io/arch"
+    operator: "Equal"
+    value: "arm64"
+    effect: "NoSchedule"
+
+## Index coordinator configuration
+indexCoord:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  tolerations:
+  - key: "kubernetes.io/arch"
+    operator: "Equal"
+    value: "arm64"
+    effect: "NoSchedule"
+
+## Query node configuration
+queryNode:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  tolerations:
+  - key: "kubernetes.io/arch"
+    operator: "Equal"
+    value: "arm64"
+    effect: "NoSchedule"
+
+## Data node configuration
+dataNode:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  tolerations:
+  - key: "kubernetes.io/arch"
+    operator: "Equal"
+    value: "arm64"
+    effect: "NoSchedule"
+
+## Index node configuration
+indexNode:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  tolerations:
+  - key: "kubernetes.io/arch"
+    operator: "Equal"
+    value: "arm64"
+    effect: "NoSchedule"
+
+## Milvus message queue configuration
+## If using Pulsar, Kafka or other components, ensure they also target Graviton
+pulsar:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  tolerations:
+  - key: "kubernetes.io/arch"
+    operator: "Equal"
+    value: "arm64"
+    effect: "NoSchedule"
+
+kafka:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  tolerations:
+  - key: "kubernetes.io/arch"
+    operator: "Equal"
+    value: "arm64"
+    effect: "NoSchedule"
+
+etcd:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  tolerations:
+  - key: "kubernetes.io/arch"
+    operator: "Equal"
+    value: "arm64"
+    effect: "NoSchedule"
+
+minio:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  tolerations:
+  - key: "kubernetes.io/arch"
+    operator: "Equal"
+    value: "arm64"
+    effect: "NoSchedule"
+
+## Optional: Add affinity to prefer Graviton nodes
+affinity:
+  nodeAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+    - weight: 100
+      preference:
+        matchExpressions:
+        - key: kubernetes.io/arch
+          operator: In
+          values:
+          - arm64
+
+## Storage configuration - reduce all PV sizes to 50GB
+standalone:
+  persistence:
+    persistentVolumeClaim:
+      size: 50Gi
+
+minio:
+  persistence:
+    size: 50Gi
+
+etcd:
+  persistence:
+    size: 50Gi
+
+pulsar:
+  bookkeeper:
+    volumes:
+      journal:
+        size: 50Gi
+      ledgers:
+        size: 50Gi
+
+pulsarv3:
+  zookeeper:
+    volumes:
+      data:
+        size: 20Gi
+  bookkeeper:
+    volumes:
+      journal:
+        size: 50Gi
+      ledgers:
+        size: 50Gi

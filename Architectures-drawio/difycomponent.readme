@@ -1,0 +1,148 @@
+## Dify组件架构分析
+
+Dify是一个LLM应用开发平台，其核心组件包括：
+
+1. Web Frontend - 基于Next.js的前端界面，提供用户交互界面
+2. API Backend - 基于Flask的后端API服务，处理核心业务逻辑
+3. Worker - 基于Celery的异步任务处理器，处理耗时操作
+4. Plugin Daemon - 插件系统守护进程，负责插件管理和执行
+5. Sandbox - 代码执行沙箱，提供安全的代码执行环境
+6. SSRF Proxy - 基于Squid的代理服务，用于安全地访问外部API
+7. Nginx Proxy - 前端代理服务器，处理请求路由和负载均衡
+
+数据存储组件：
+• **PostgreSQL** - 主要关系型数据库，存储应用数据
+• **Redis** - 缓存和消息队列
+• **Weaviate** - 向量数据库，用于存储和检索向量嵌入
+
+组件间的主要调用关系：
+• Web Frontend通过HTTP API与API Backend交互
+• API Backend与Plugin Daemon交互以执行插件功能
+• API Backend通过SSRF Proxy安全地调用外部LLM API
+• Worker处理异步任务，与API Backend通过Redis队列通信
+• Worker与Sandbox交互执行代码
+• 所有组件共享PostgreSQL作为主数据存储
+• Redis用于缓存和消息队列
+• Weaviate用于向量搜索和检索
+
+## Dify Kubernetes部署架构
+
+在EKS集群的dify命名空间中，Dify通过Helm Chart部署了以下Kubernetes资源：
+
+1. Deployments:
+   • dify-graviton-api - API后端服务
+   • dify-graviton-web - Web前端服务
+   • dify-graviton-worker - 异步任务处理器
+   • dify-graviton-plugin-daemon - 插件系统守护进程
+   • dify-graviton-sandbox - 代码执行沙箱
+   • dify-graviton-proxy - Nginx代理
+   • dify-graviton-ssrf-proxy - SSRF代理
+
+2. StatefulSets:
+   • dify-graviton-postgresql-primary - PostgreSQL主节点
+   • dify-graviton-postgresql-read - PostgreSQL只读节点
+   • dify-graviton-redis-master - Redis主节点
+   • dify-graviton-redis-replicas - Redis从节点
+
+3. Services:
+   • 每个组件都有对应的ClusterIP服务，用于内部通信
+   • dify-graviton - 主服务，用于外部访问
+
+4. PersistentVolumeClaims:
+   • 为需要持久化存储的组件提供存储卷
+   • 包括API、Plugin Daemon、PostgreSQL和Redis的数据存储
+
+5. ConfigMaps & Secrets:
+   • 存储配置信息和敏感数据
+
+6. ServiceAccounts:
+   • 为各组件提供必要的权限
+
+这两张架构图可以帮助您更好地理解Dify的组件关系和在Kubernetes中的部署结构。您可以使用draw.io或其他支持.drawio格式的工具打开这些文件进行查看或编辑。
+
+> 为我分别生成这两张架构图的讲解
+
+我将为您详细讲解这两张架构图，帮助您更好地理解Dify的组件关系和Kubernetes部署结构。
+
+## Dify组件架构图讲解
+
+Dify组件架构图展示了各个组件之间的相互调用关系和数据流向，这对理解整个系统的工作原理非常重要。
+
+### 核心组件及其功能
+
+1. Nginx Proxy (顶层)
+   • 作为整个系统的入口点，处理所有外部请求
+   • 负责请求路由、负载均衡和反向代理
+   • 将请求分发到Web Frontend或API Backend
+
+2. Web Frontend (Next.js)
+   • 基于Next.js构建的用户界面层
+   • 提供交互式的应用创建、管理和监控界面
+   • 通过HTTP API与后端服务通信
+
+3. API Backend (Flask)
+   • 核心业务逻辑处理层，基于Flask框架
+   • 处理用户认证、应用管理、模型调用等功能
+   • 与其他组件协调工作，是系统的中枢
+
+4. Worker (Celery)
+   • 异步任务处理器，基于Celery框架
+   • 处理耗时操作，如大规模数据处理、模型训练等
+   • 通过Redis作为消息队列与API Backend通信
+
+5. Plugin Daemon
+   • 插件系统的守护进程
+   • 负责插件的安装、管理、执行和生命周期控制
+   • 通过API与API Backend交互
+
+6. Sandbox (Code Execution)
+   • 安全的代码执行环境
+   • 允许在隔离环境中执行用户代码
+   • 防止恶意代码对系统造成损害
+
+7. SSRF Proxy (Squid)
+   • 服务器端请求伪造(SSRF)防护代理
+   • 安全地中转对外部LLM API的调用
+   • 过滤和验证外部请求，防止安全漏洞
+
+### 数据存储组件
+
+1. PostgreSQL
+   • 主要关系型数据库
+   • 存储用户数据、应用配置、模型信息等结构化数据
+   • 支持事务和复杂查询
+
+2. Redis
+   • 内存数据库，用于缓存和消息队列
+   • 支持Celery任务队列
+   • 提高系统响应速度和性能
+
+3. Vector DB (Weaviate)
+   • 向量数据库，专门用于存储和检索向量嵌入
+   • 支持语义搜索和相似度查询
+   • 用于知识库和RAG(检索增强生成)功能
+
+### 组件间的调用关系
+
+1. 数据流向
+   • 用户请求首先通过Nginx Proxy进入系统
+   • Web Frontend处理UI交互，通过API调用API Backend
+   • API Backend处理核心逻辑，与各个组件协调
+   • 耗时任务委托给Worker异步处理
+   • 插件功能通过Plugin Daemon执行
+   • 代码执行在Sandbox中安全进行
+   • 外部API调用通过SSRF Proxy安全中转
+
+2. 关键接口
+   • Web与API之间：HTTP/REST API
+   • API与Worker之间：Redis消息队列
+   • API与Plugin Daemon之间：Plugin API
+   • Worker与Sandbox之间：Code Execution API
+   • API与SSRF Proxy之间：HTTP Proxy
+
+3. 数据存储访问
+   • 所有组件共享PostgreSQL作为主数据存储
+   • Redis用于缓存和任务队列
+   • Weaviate用于向量存储和检索
+
+这种架构设计实现了关注点分离，每个组件负责特定功能，通过明确定义的接口相互协作，提高了系统的可维护性、可扩展性和安全性。

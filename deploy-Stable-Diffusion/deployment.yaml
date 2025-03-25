@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-data-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: efs-output-pvc
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: efs-sc
+  resources:
+    requests:
+      storage: 10Gi
+
+
+---
+# 一次性任务
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: sd-download
+spec:
+  template:
+    spec:
+      containers:
+      - name: download
+        image: 970547376847.dkr.ecr.us-west-2.amazonaws.com/sd-download:v1
+        volumeMounts:
+        - name: data-volume
+          mountPath: /data
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: efs-data-pvc
+      restartPolicy: Never  # 重要：Job 需要设置 restartPolicy
+  backoffLimit: 4  # 失败重试次数
+
+---
+# SD WebUI 的 Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sd-auto
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sd-auto
+  template:
+    metadata:
+      labels:
+        app: sd-auto
+    spec:
+      securityContext:  # ✅ fsGroup 应该放在这里
+        runAsUser: 0
+        fsGroup: 0 
+      containers:
+      - name: auto
+        image: 970547376847.dkr.ecr.us-west-2.amazonaws.com/sd-auto:v9
+        ports:
+        - containerPort: 7860
+        env:
+        - name: CLI_ARGS
+          value: "--allow-code --medvram --xformers --enable-insecure-extension-access --api"
+        securityContext:
+          runAsUser: 0   #root
+          allowPrivilegeEscalation: true  # 这个字段要放在 containers.securityContext 里
+          readOnlyRootFilesystem: false  
+        volumeMounts:
+        - name: data-volume
+          mountPath: /data
+        - name: output-volume
+          mountPath: /output
+        resources:
+          requests:
+            memory: "8Gi"
+            cpu: "2"
+            nvidia.com/gpu: "1"
+          limits:
+            memory: "16Gi"
+            cpu: "4"
+            nvidia.com/gpu: "1"
+      nodeSelector:
+        NodeGroupType: g5-gpu-karpenter
+        type: karpenter
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: efs-data-pvc
+      - name: output-volume
+        persistentVolumeClaim:
+          claimName: efs-output-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sd-auto-service
+spec:
+  selector:
+    app: sd-auto
+  ports:
+    - protocol: TCP
+      port: 7860
+      targetPort: 7860
+  type: ClusterIP

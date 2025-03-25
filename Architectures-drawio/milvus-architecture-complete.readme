@@ -1,0 +1,53 @@
+## Milvus 架构详细说明
+
+### 组件间的连接关系
+
+1. 客户端与接入层
+   • 客户端应用通过 SDK 或 REST API 连接到 Proxy
+
+2. 接入层与协调层
+   • Proxy 连接到所有协调器组件(Root/Query/Data/Index Coordinator)
+   • 或者连接到 Mix Coordinator (当启用时)
+
+3. 协调层与工作节点层
+   • Query Coordinator 管理和调度 Query Node
+   • Data Coordinator 管理和调度 Data Node
+   • Index Coordinator 管理和调度 Index Node
+
+4. 工作节点与存储层
+   • 所有工作节点都连接到 etcd 获取元数据
+   • Query Node 连接到 MinIO/S3 读取向量数据和索引
+   • Query Node 连接到 Pulsar/Kafka 接收搜索请求
+   • Data Node 连接到 MinIO/S3 存储向量数据
+   • Data Node 连接到 Pulsar/Kafka 接收插入请求
+   • Index Node 连接到 MinIO/S3 存储索引
+   • Index Node 连接到 Pulsar/Kafka 接收索引构建请求
+
+5. 协调层与存储层
+   • Root Coordinator 连接到 etcd 存储系统元数据
+   • 所有协调器连接到 Pulsar/Kafka 进行消息传递
+
+### 数据流向
+
+1. 写入流程
+   • 客户端 → Proxy → Data Coordinator → Data Node → MinIO/S3
+   • 同时通过消息队列触发索引构建: Data Node → Pulsar/Kafka → Index Node
+
+2. 查询流程
+   • 客户端 → Proxy → Query Coordinator → Query Node → MinIO/S3 → 返回结果
+
+3. 索引构建流程
+   • Index Coordinator → Pulsar/Kafka → Index Node → MinIO/S3
+
+### 部署模式
+
+1. 集群模式
+   • 所有组件分开部署
+   • 每个组件可以独立扩展
+   • 使用 Pulsar/Kafka 作为消息队列
+
+2. 单机模式
+   • 所有组件在一个进程中运行
+   • 使用 RocksMQ 作为内部消息队列
+   • 适合开发和小规模部署
+

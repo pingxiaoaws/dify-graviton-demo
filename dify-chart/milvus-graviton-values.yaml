@@ -1,0 +1,75 @@
+# Dify values for using external Milvus on Graviton
+
+# 为所有组件配置节点选择器，确保部署到 Graviton 节点上
+global:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+
+# API 组件配置
+api:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+  persistence:
+    persistentVolumeClaim:
+      storageClass: efs-sc
+      accessModes: ReadWriteMany
+      size: 5Gi
+
+# Worker 组件配置
+worker:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+
+# Web 组件配置
+web:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+
+# Proxy 组件配置
+proxy:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+
+# Sandbox 组件配置
+sandbox:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+
+# SSRF Proxy 组件配置
+ssrfProxy:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+
+# Plugin Daemon 组件配置
+pluginDaemon:
+  nodeSelector:
+    kubernetes.io/arch: arm64
+
+# PostgreSQL 配置
+postgresql:
+  primary:
+    nodeSelector:
+      kubernetes.io/arch: arm64
+  readReplicas:
+    nodeSelector:
+      kubernetes.io/arch: arm64
+
+# Redis 配置
+redis:
+  master:
+    nodeSelector:
+      kubernetes.io/arch: arm64
+  replica:
+    nodeSelector:
+      kubernetes.io/arch: arm64
+
+# 禁用内置向量数据库
+weaviate:
+  enabled: false
+
+# 使用外部 Milvus 配置
+externalMilvus:
+  enabled: true
+  host: "milvus-graviton.milvus.svc.cluster.local"
+  port: 19530
+  database: "default"

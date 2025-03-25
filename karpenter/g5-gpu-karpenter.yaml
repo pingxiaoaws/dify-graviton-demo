@@ -1,0 +1,77 @@
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: g5-gpu-karpenter
+spec:
+  # amiSelectorTerms: 
+  #   - name: bottlerocket
+  amiSelectorTerms:
+    - alias: "al2023@v20250228"
+  role: KarpenterNodeRole-dify-eks # 需要替换为实际的 IAM 角色名
+  # subnetSelector:
+  #   id: subnet-0f38d311d55eeb8b5  # 需要替换为实际的子网 ID
+  # securityGroupSelector:
+  #   tags:
+  #     Name: ${cluster_name}-node  # 需要替换为实际的集群名称
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "dify-eks" # replace with your cluster name
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: "dify-eks" # replace with your cluster name
+  instanceStorePolicy: RAID0
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeSize: 50Gi
+        volumeType: gp3
+        encrypted: true
+    - deviceName: /dev/xvdb
+      ebs:
+        volumeSize: 300Gi
+        volumeType: gp3
+        encrypted: true
+        # 如果需要 snapshot ID，取消下面的注释并替换值
+        # snapshotID: ${snapshot_id}
+
+---
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: g5-gpu-karpenter
+spec:
+  template:
+    metadata:
+      labels:
+        type: karpenter
+        NodeGroupType: g5-gpu-karpenter
+    spec:
+      taints:
+        - key: nvidia.com/gpu
+          value: "Exists"
+          effect: "NoSchedule"
+      requirements:
+        - key: "karpenter.k8s.aws/instance-family"
+          operator: In
+          values: ["g5"]
+        - key: "karpenter.k8s.aws/instance-size"
+          operator: In
+          values: ["2xlarge", "4xlarge", "8xlarge"]
+        - key: "kubernetes.io/arch"
+          operator: In
+          values: ["amd64"]
+        - key: "karpenter.sh/capacity-type"
+          operator: In
+          values: ["spot", "on-demand"]
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: g5-gpu-karpenter
+
+  limits:
+    cpu: 1000
+  disruption:
+    consolidationPolicy: WhenEmpty
+    consolidateAfter: 100m
+    # expireAfter: 720h
+  weight: 100

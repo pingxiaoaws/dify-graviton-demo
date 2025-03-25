@@ -1,0 +1,215 @@
+<mxfile host="app.diagrams.net" modified="2025-03-21T07:57:14.000Z" agent="Mozilla/5.0" version="22.1.21" etag="Ks8Ue_Ks8Ue_Ks8Ue" type="device">
+  <diagram id="dify-kubernetes-architecture" name="Dify Kubernetes Architecture">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="#ffffff" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- EKS Cluster -->
+        <mxCell id="2" value="Amazon EKS Cluster" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;verticalAlign=top;fontStyle=1;fontSize=16;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="1020" height="760" as="geometry" />
+        </mxCell>
+        
+        <!-- Dify Namespace -->
+        <mxCell id="3" value="Namespace: dify" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;fontStyle=1;fontSize=14;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="90" width="940" height="680" as="geometry" />
+        </mxCell>
+        
+        <!-- Ingress -->
+        <mxCell id="4" value="Ingress" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+          <mxGeometry x="480" y="130" width="120" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Services -->
+        <mxCell id="5" value="Services" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;fontStyle=1;fontSize=14;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="210" width="860" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- Main Service -->
+        <mxCell id="6" value="dify-graviton&#xa;(ClusterIP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="140" y="250" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- API Service -->
+        <mxCell id="7" value="dify-graviton-api&#xa;(ClusterIP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="250" y="250" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Web Service -->
+        <mxCell id="8" value="dify-graviton-web&#xa;(ClusterIP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="360" y="250" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Worker Service -->
+        <mxCell id="9" value="dify-graviton-worker&#xa;(ClusterIP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="470" y="250" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Plugin Daemon Service -->
+        <mxCell id="10" value="dify-graviton-plugin-daemon&#xa;(ClusterIP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="580" y="250" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Sandbox Service -->
+        <mxCell id="11" value="dify-graviton-sandbox&#xa;(ClusterIP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="690" y="250" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- SSRF Proxy Service -->
+        <mxCell id="12" value="dify-graviton-ssrf-proxy&#xa;(ClusterIP)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="800" y="250" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Deployments -->
+        <mxCell id="13" value="Deployments" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;fontStyle=1;fontSize=14;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="330" width="860" height="160" as="geometry" />
+        </mxCell>
+        
+        <!-- Proxy Deployment -->
+        <mxCell id="14" value="dify-graviton-proxy&#xa;(Nginx)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="140" y="370" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- API Deployment -->
+        <mxCell id="15" value="dify-graviton-api&#xa;(Flask)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="270" y="370" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Web Deployment -->
+        <mxCell id="16" value="dify-graviton-web&#xa;(Next.js)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="400" y="370" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Worker Deployment -->
+        <mxCell id="17" value="dify-graviton-worker&#xa;(Celery)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="530" y="370" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Plugin Daemon Deployment -->
+        <mxCell id="18" value="dify-graviton-plugin-daemon" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="660" y="370" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Sandbox Deployment -->
+        <mxCell id="19" value="dify-graviton-sandbox&#xa;(Code Execution)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="790" y="370" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- SSRF Proxy Deployment -->
+        <mxCell id="20" value="dify-graviton-ssrf-proxy&#xa;(Squid)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="140" y="430" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- StatefulSets -->
+        <mxCell id="21" value="StatefulSets" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;verticalAlign=top;fontStyle=1;fontSize=14;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="510" width="860" height="120" as="geometry" />
+        </mxCell>
+        
+        <!-- PostgreSQL Primary -->
+        <mxCell id="22" value="dify-graviton-postgresql-primary" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="140" y="550" width="180" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- PostgreSQL Read -->
+        <mxCell id="23" value="dify-graviton-postgresql-read" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="330" y="550" width="180" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Redis Master -->
+        <mxCell id="24" value="dify-graviton-redis-master" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="520" y="550" width="180" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Redis Replicas -->
+        <mxCell id="25" value="dify-graviton-redis-replicas" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="710" y="550" width="180" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- PersistentVolumeClaims -->
+        <mxCell id="26" value="PersistentVolumeClaims" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;verticalAlign=top;fontStyle=1;fontSize=14;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="650" width="860" height="100" as="geometry" />
+        </mxCell>
+        
+        <!-- API PVC -->
+        <mxCell id="27" value="dify-graviton&#xa;(API Storage)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="140" y="690" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Plugin Daemon PVC -->
+        <mxCell id="28" value="dify-graviton-plugin-daemon&#xa;(Plugin Storage)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="250" y="690" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- PostgreSQL PVC -->
+        <mxCell id="29" value="PostgreSQL Data" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="360" y="690" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Redis PVC -->
+        <mxCell id="30" value="Redis Data" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="470" y="690" width="100" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- ConfigMaps and Secrets -->
+        <mxCell id="31" value="ConfigMaps &amp; Secrets" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="580" y="690" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Service Accounts -->
+        <mxCell id="32" value="Service Accounts" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=12;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="710" y="690" width="120" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- Connections -->
+        <!-- Ingress to Main Service -->
+        <mxCell id="33" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="4" target="5">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="520" y="410" as="sourcePoint" />
+            <mxPoint x="570" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Services to Deployments -->
+        <mxCell id="34" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="5" target="13">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="520" y="410" as="sourcePoint" />
+            <mxPoint x="570" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Deployments to StatefulSets -->
+        <mxCell id="35" value="" style="endArrow=classic;startArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="13" target="21">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="520" y="410" as="sourcePoint" />
+            <mxPoint x="570" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- StatefulSets to PVCs -->
+        <mxCell id="36" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="21" target="26">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="520" y="410" as="sourcePoint" />
+            <mxPoint x="570" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Labels -->
+        <mxCell id="37" value="External Traffic" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="540" y="180" width="90" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="38" value="Service Discovery" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="550" y="310" width="100" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="39" value="Data Access" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="550" y="490" width="80" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="40" value="Persistent Storage" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;" vertex="1" parent="1">
+          <mxGeometry x="550" y="630" width="100" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

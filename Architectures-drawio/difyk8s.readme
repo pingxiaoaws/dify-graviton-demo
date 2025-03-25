@@ -1,0 +1,103 @@
+## Dify Kubernetes部署架构图讲解
+
+Dify Kubernetes部署架构图展示了在EKS集群中如何组织和部署Dify的各个组件，以及它们之间的关系。
+
+### 集群结构
+
+1. Amazon EKS Cluster (最外层)
+   • 托管Kubernetes环境，提供容器编排和管理
+   • 负责节点管理、自动扩缩容和集群健康监控
+
+2. Namespace: dify
+   • 专用命名空间，隔离Dify应用资源
+   • 便于权限管理和资源配额控制
+
+### 网络层
+
+1. Ingress
+   • 管理集群外部流量进入集群内服务的规则
+   • 配置主机名、路径和TLS设置
+   • 将流量路由到适当的服务
+
+2. Services
+   • 提供稳定的网络端点，抽象底层Pod变化
+   • 所有服务都使用ClusterIP类型，仅供集群内部访问
+   • 主要服务包括：
+     • dify-graviton (主服务)
+     • dify-graviton-api (API服务)
+     • dify-graviton-web (Web前端服务)
+     • dify-graviton-worker (Worker服务)
+     • dify-graviton-plugin-daemon (插件守护进程服务)
+     • dify-graviton-sandbox (沙箱服务)
+     • dify-graviton-ssrf-proxy (SSRF代理服务)
+
+### 应用层
+
+1. Deployments
+   • 管理无状态应用的部署和更新
+   • 确保指定数量的Pod副本运行
+   • 主要部署包括：
+     • dify-graviton-proxy (Nginx代理)
+     • dify-graviton-api (API后端)
+     • dify-graviton-web (Web前端)
+     • dify-graviton-worker (异步任务处理器)
+     • dify-graviton-plugin-daemon (插件守护进程)
+     • dify-graviton-sandbox (代码执行沙箱)
+     • dify-graviton-ssrf-proxy (SSRF代理)
+
+2. StatefulSets
+   • 管理有状态应用，提供稳定的网络标识和存储
+   • 主要用于数据库和缓存服务
+   • 包括：
+     • dify-graviton-postgresql-primary (PostgreSQL主节点)
+     • dify-graviton-postgresql-read (PostgreSQL只读节点)
+     • dify-graviton-redis-master (Redis主节点)
+     • dify-graviton-redis-replicas (Redis从节点)
+
+### 存储层
+
+1. PersistentVolumeClaims (PVCs)
+   • 请求持久化存储资源
+   • 为有状态应用提供数据持久化
+   • 主要PVC包括：
+     • API存储 (用于存储上传的文件和模型)
+     • Plugin Daemon存储 (用于存储插件数据)
+     • PostgreSQL数据存储
+     • Redis数据存储
+
+### 配置和安全
+
+1. ConfigMaps & Secrets
+   • ConfigMaps存储非敏感配置数据
+   • Secrets存储敏感信息，如API密钥、数据库密码等
+   • 以环境变量或卷的形式挂载到容器中
+
+2. Service Accounts
+   • 为Pod提供身份凭证
+   • 控制Pod对Kubernetes API的访问权限
+   • 每个组件使用专用的Service Account
+
+### 部署流程和数据流向
+
+1. 外部流量路径
+   • 外部请求首先到达Ingress
+   • Ingress将请求路由到主服务(dify-graviton)
+   • 主服务将请求转发到Nginx代理
+   • Nginx代理根据路径将请求分发到Web前端或API后端
+
+2. 服务发现
+   • 各组件通过Kubernetes Service进行服务发现
+   • 使用服务名作为DNS名称进行通信
+   • 例如，API可以通过dify-graviton-redis-master访问Redis
+
+3. 数据访问
+   • 应用组件通过各自的Service访问数据库和缓存
+   • StatefulSets确保数据库和缓存的稳定性和可靠性
+   • 持久化数据存储在PVC中，与Pod生命周期分离
+
+4. 扩展性考虑
+   • Deployment支持水平扩展，可以增加Pod副本数
+   • StatefulSet提供有序部署和扩展
+   • 服务层抽象底层Pod变化，确保稳定的网络访问
+
+这种Kubernetes部署架构充分利用了Kubernetes的编排能力，实现了高可用、可扩展和易管理的Dify平台部署。通过合理的资源组织和关系定义，系统各组件能够协同工作，提供完整的LLM应用开发平台功能。
