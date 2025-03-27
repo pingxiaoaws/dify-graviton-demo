@@ -1,0 +1,72 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: dify
+  name: dify-ingress
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=600
+    alb.ingress.kubernetes.io/target-group-attributes: deregistration_delay.timeout_seconds=30
+    alb.ingress.kubernetes.io/subnets: subnet-0ab9282c748d87511,subnet-08a07253e176e1909,subnet-05abc2d68c50fd8ae,subnet-0ddf028eca68fffa2
+    # 使用宽松的健康检查配置
+    alb.ingress.kubernetes.io/healthcheck-path: /
+    alb.ingress.kubernetes.io/success-codes: '200-499'
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '30'
+    alb.ingress.kubernetes.io/healthy-threshold-count: '2'
+    alb.ingress.kubernetes.io/unhealthy-threshold-count: '2'
+spec:
+  ingressClassName: alb
+  rules:
+    - http:
+        paths:
+          - path: /console/api
+            pathType: Prefix
+            backend:
+              service:
+                name: dify-graviton-api
+                port:
+                  number: 5001
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: dify-graviton-api
+                port:
+                  number: 5001
+          - path: /v1
+            pathType: Prefix
+            backend:
+              service:
+                name: dify-graviton-api
+                port:
+                  number: 5001
+          - path: /files
+            pathType: Prefix
+            backend:
+              service:
+                name: dify-graviton-api
+                port:
+                  number: 5001
+          - path: /explore
+            pathType: Prefix
+            backend:
+              service:
+                name: dify-graviton-web
+                port:
+                  number: 3000
+          - path: /e
+            pathType: Prefix
+            backend:
+              service:
+                name: dify-graviton-plugin-daemon
+                port:
+                  number: 5002
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: dify-graviton-web
+                port:
+                  number: 3000

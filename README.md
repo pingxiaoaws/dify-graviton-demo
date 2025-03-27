@@ -18,7 +18,7 @@ This demo deploys a complete AI application stack on Amazon EKS with multiple no
 - kubectl installed
 - Helm v3 installed
 - eksctl installed
-- Docker installed (for building custom images)
+
 
 ## Deployment Steps
 
@@ -31,7 +31,13 @@ eksctl create cluster \
   --region us-west-2 \
   --version 1.28 \
   --without-nodegroup
+
+# Create storage class
+kubectl apply -f efssc.yaml
+kubectl apply -f g3-storage-class.yaml
 ```
+After you created cluster, please install Amazon EFS CSI Driver from the add-on catalog.
+
 
 ### 2. Install Karpenter for Node Provisioning
 
@@ -43,22 +49,44 @@ kubectl apply -f karpenter/karpenter.yaml
 
 # Create GP3 storage class for persistent volumes
 kubectl apply -f karpenter/gp3-storage-class.yaml
-```
 
-### 3. Create Node Groups with Karpenter
-
-```bash
 # Create Graviton node group for Dify
-kubectl apply -f karpenter/gvn-nodepool.yaml
+kubectl apply -f karpenter/gvn-nodepool.yaml 
 
 # Create x86 node group for general workloads
 kubectl apply -f karpenter/x86-node-pool.yaml
 
 # Create GPU node group for AI workloads
 kubectl apply -f karpenter/g5-gpu-karpenter.yaml
+
+#EKS Auto-mode Create Graviton node group for Dify
+kubectl apply -f karpenter/gvn-nodepool-automode.yaml 
+
+#EKS Auto-mode Create x86 node group for general workloads
+kubectl apply -f karpenter/x86-node-pool-automode.yaml
+
+#EKS Auto-mode Create GPU node group for AI workloads
+kubectl apply -f karpenter/g5-gpu-karpenter-automode.yaml
+
+
 ```
 
-### 4. Deploy Dify on Graviton Nodes
+### 3. Install nvidia-device-plugin (skip this if EKS automode)
+```bash
+helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+helm repo update
+
+helm install nvidia-device-plugin nvidia/nvidia-device-plugin --version 0.17.1 --values dify-graviton-demo/vllm-ray-gpu-deepseek/nvidia-device-plugin-values.yaml --namespace gpu-operator --create-namespace
+```
+
+
+### 4. Deploy Milvus on Graviton Nodes
+```bash
+kubectl create namespace milvus
+helm install milvus-graviton -n milvus -f graviton-values-smallsize.yaml .
+```
+
+### 5. Deploy Dify on Graviton Nodes
 
 Dify is deployed using Helm charts with specific configurations for Graviton:
 
@@ -67,12 +95,24 @@ Dify is deployed using Helm charts with specific configurations for Graviton:
 cd dify-chart
 
 # Install Dify with Graviton-optimized values
-helm install dify . \
+helm install dify-graviton . \
   --namespace dify \
   --create-namespace \
-  --values values.yaml \
-  --set nodeSelector.kubernetes\\.io/arch=arm64
+  -f milvus-graviton-values.yaml
+ # Sample output
+NAME: dify-graviton
+LAST DEPLOYED: Wed Mar 26 19:59:37 2025
+NAMESPACE: dify
+STATUS: deployed
+REVISION: 1
+NOTES:
+1. Get the application URL by running these commands:
+  export POD_NAME=$(kubectl get pods --namespace dify -l "app.kubernetes.io/name=dify,app.kubernetes.io/instance=dify-graviton,component=proxy" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace dify $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:8080 to use your application"
+  kubectl --namespace dify port-forward $POD_NAME 8080:$CONTAINER_PORT 
 ```
+
 
 The Dify deployment includes:
 - Web UI
@@ -80,7 +120,7 @@ The Dify deployment includes:
 - Worker processes
 - Milvus vector database (deployed with optimized settings for Graviton)
 
-### 5. Deploy Stable Diffusion on GPU Nodes
+### 6. Deploy Stable Diffusion on GPU Nodes
 
 Stable Diffusion is deployed as a Kubernetes deployment targeting GPU nodes:
 
@@ -94,23 +134,64 @@ This deployment:
 - Exposes an API endpoint for image generation
 - Integrates with Dify for multimodal capabilities
 
-### 6. Deploy DeepSeek LLM with KubeRay on GPU Nodes
 
+### 7. Deploy DeepSeek LLM with KubeRay on GPU Nodes
 DeepSeek is deployed using KubeRay for efficient GPU utilization:
 
 ```bash
+cat > kuberay-operator-values.yaml << 'EOF'
+batchScheduler:
+  enabled: true
+EOF
+
+# 添加 KubeRay Helm 仓库
+helm repo add kuberay https://ray-project.github.io/kuberay-helm/
+
+# 更新 Helm 仓库
+helm repo update
+
+# 创建 values 文件
+cat > kuberay-operator-values.yaml << 'EOF'
+batchScheduler:
+  enabled: true
+EOF
+
+# 安装 KubeRay Operator
+helm install kuberay-operator kuberay/kuberay-operator \
+  --version 1.1.1 \
+  --values kuberay-operator-values.yaml \
+  --namespace kuberay-operator \
+  --create-namespace
+
+# Install nvidia-device-plugin （no need for EKS automode）
+helm repo add nvidia https://helm.ngc.nvidia.com/nvidia
+helm repo update
+
+helm install nvidia-device-plugin nvidia/nvidia-device-plugin --version 0.17.1 --values dify-graviton-demo/vllm-ray-gpu-deepseek/nvidia-de
+
+
 # Install KubeRay operator
-kubectl create namespace ray-system
-kubectl apply -k "github.com/ray-project/kuberay/ray-operator/config/default?ref=v1.0.0"
+helm repo add volcano https://volcano-sh.github.io/helm-charts
+helm repo update
+helm install volcano volcano/volcano --namespace volcano-system 
+--create-namespace
+
+helm repo add kuberay https://ray-project.github.io/kuberay-helm/
+helm install kuberay-operator kuberay/kuberay-operator \
+  --version 1.1.1 \
+  --values kuberay-operator-values.yaml \
+  --namespace kuberay-operator \
+  --create-namespace
 
 # Deploy DeepSeek with vLLM on Ray
-kubectl apply -f vllm-ray-gpu-deepseek/ray-vllm-deepseek.yml
+export HUGGING_FACE_HUB_TOKEN=$(echo -n "Your-Hugging-Face-Hub-Token-Value" | base64)
+envsubst < ray-vllm-deepseek.yml | kubectl apply -f -
 
 # Deploy Open WebUI for interacting with DeepSeek
 kubectl apply -f vllm-ray-gpu-deepseek/open-webui.yaml
 ```
 
-### 7. Verify Deployments
+### 8. Verify Deployments
 
 ```bash
 # Check node groups

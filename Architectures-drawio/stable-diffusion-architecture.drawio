@@ -1,0 +1,95 @@
+<mxfile host="65bd71144e">
+    <diagram id="stable-diffusion-architecture" name="Stable Diffusion Architecture">
+        <mxGraphModel dx="1074" dy="749" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                
+                <!-- EKS Cluster -->
+                <mxCell id="2" value="EKS Cluster" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;fontStyle=1;fontSize=14;" vertex="1" parent="1">
+                    <mxGeometry x="40" y="40" width="760" height="560" as="geometry"/>
+                </mxCell>
+                
+                <!-- G5 GPU Node -->
+                <mxCell id="3" value="G5 GPU Node (Karpenter Provisioned)&#xa;NodeGroupType=g5-gpu-karpenter" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;verticalAlign=top;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="80" y="100" width="680" height="320" as="geometry"/>
+                </mxCell>
+                
+                <!-- SD Auto Pod -->
+                <mxCell id="4" value="sd-auto Pod" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="120" y="160" width="600" height="220" as="geometry"/>
+                </mxCell>
+                
+                <!-- Auto Container -->
+                <mxCell id="5" value="Container: auto&#xa;Image: 970547376847.dkr.ecr.us-west-2.amazonaws.com/sd-auto:v9&#xa;Port: 7860&#xa;Resources:&#xa;- CPU: 2-4&#xa;- Memory: 8-16Gi&#xa;- GPU: 1 (nvidia.com/gpu)&#xa;&#xa;Environment:&#xa;CLI_ARGS: --allow-code --medvram --xformers --enable-insecure-extension-access --api" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;align=left;spacingLeft=10;" vertex="1" parent="1">
+                    <mxGeometry x="140" y="200" width="560" height="160" as="geometry"/>
+                </mxCell>
+                
+                <!-- EFS Storage -->
+                <mxCell id="6" value="AWS EFS (fs-03301d9580f94bd22)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;verticalAlign=top;fontStyle=1" vertex="1" parent="1">
+                    <mxGeometry x="80" y="460" width="680" height="100" as="geometry"/>
+                </mxCell>
+                
+                <!-- EFS PVCs -->
+                <mxCell id="7" value="efs-data-pvc&#xa;(10Gi, RWX)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="120" y="500" width="280" height="40" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="8" value="efs-output-pvc&#xa;(10Gi, RWX)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+                    <mxGeometry x="440" y="500" width="280" height="40" as="geometry"/>
+                </mxCell>
+                
+                <!-- Service -->
+                <mxCell id="9" value="Service: sd-auto-service&#xa;Type: ClusterIP (10.100.115.115)&#xa;Port: 7860 → 7860" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
+                    <mxGeometry x="240" y="400" width="360" height="60" as="geometry"/>
+                </mxCell>
+                
+                <!-- Connections -->
+                <mxCell id="10" value="" style="endArrow=classic;html=1;exitX=0.5;exitY=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="9" target="4">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="400" y="410" as="sourcePoint"/>
+                        <mxPoint x="450" y="360" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                
+                <mxCell id="11" value="" style="endArrow=classic;html=1;exitX=0.25;exitY=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="4" target="7">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="400" y="410" as="sourcePoint"/>
+                        <mxPoint x="450" y="360" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                
+                <mxCell id="12" value="" style="endArrow=classic;html=1;exitX=0.75;exitY=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="4" target="8">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="400" y="410" as="sourcePoint"/>
+                        <mxPoint x="450" y="360" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                
+                <mxCell id="13" value="Volume Mount: /data" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="220" y="400" width="120" height="20" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="14" value="Volume Mount: /output" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="520" y="400" width="120" height="20" as="geometry"/>
+                </mxCell>
+                
+                <!-- External Access -->
+                <mxCell id="15" value="External Access (Potential ALB/Ingress)" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" vertex="1" parent="1">
+                    <mxGeometry x="320" y="600" width="200" height="80" as="geometry"/>
+                </mxCell>
+                
+                <mxCell id="16" value="" style="endArrow=classic;startArrow=classic;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="15" target="9">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="400" y="410" as="sourcePoint"/>
+                        <mxPoint x="450" y="360" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                
+                <mxCell id="17" value="HTTP Port 7860" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="420" y="570" width="100" height="20" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
