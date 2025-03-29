@@ -281,11 +281,7 @@ QDRANT_GRPC_PORT: {{ .Values.externalQdrant.grpc.port | quote }}
 # Milvus configuration Only available when VECTOR_STORE is `milvus`.
 VECTOR_STORE: milvus
 # The milvus host.
-MILVUS_HOST: {{ .Values.externalMilvus.host | quote }}
-# The milvus host.
-MILVUS_PORT: {{ .Values.externalMilvus.port | toString | quote }}
-# The milvus database
-MILVUS_DATABASE: {{ .Values.externalMilvus.database | quote }}
+MILVUS_URI: {{ .Values.externalMilvus.uri | quote }}
 # The milvus username.
 # MILVUS_USER: {{ .Values.externalMilvus.user | quote }}
 # The milvus password.

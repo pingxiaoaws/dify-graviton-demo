@@ -70,6 +70,4 @@ weaviate:
 # 使用外部 Milvus 配置
 externalMilvus:
   enabled: true
-  host: "milvus-graviton.milvus.svc.cluster.local"
-  port: 19530
-  database: "default"
+  uri: "http://milvus-graviton.milvus.svc.cluster.local:19530"
